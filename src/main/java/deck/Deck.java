@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 public class Deck implements IDeck{
-    LinkedList<Card> cards;
+    private LinkedList<Card> cards;
 
     Deck(){
         this.shuffle();
@@ -23,10 +23,9 @@ public class Deck implements IDeck{
         this.cards = cards;
     }
 
-    public static void main(String[] args) {
-
+    public boolean contains(Card card){
+        return this.cards.contains(card);
     }
-
     @Override
     public Card getNextCard() {
         return cards.pollFirst();
