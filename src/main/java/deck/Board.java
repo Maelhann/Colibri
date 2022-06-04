@@ -10,10 +10,11 @@ public class Board implements IBoard {
        this.cards = new ArrayList<>();
     }
 
-    public void addCard(Card card){
-        assert cards.size() < 8;
+    public boolean addCard(Card card){
+        if (cards.size() >= 7) return false;
         cards.add(card);
         this.bestHand = evaluateBestHand();
+        return true;
     }
 
     public void clearHand(){

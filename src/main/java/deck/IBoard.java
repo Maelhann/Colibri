@@ -1,7 +1,7 @@
 package deck;
 
 public interface IBoard {
-    void addCard(Card card);
+    boolean addCard(Card card);
     void clearHand();
     Hand evaluateBestHand();
 }
