@@ -1,22 +1,19 @@
 package deck;
 
-import java.util.ArrayList;
-import java.util.List;
+public class Hand {
+    private final HandType type;
+    private final Rank handRank;
 
-public class Hand implements IHand{
-    List<Card> cards;
-
-    Hand(){
-       this.cards = new ArrayList<>();
+    Hand(HandType type, Rank handRank){
+        this.type = type;
+        this.handRank = handRank;
     }
 
-    public void addCard(Card card){
-        assert cards.size() < 8;
-        cards.add(card);
+    public HandType getType() {
+        return type;
     }
 
-    public void clearHand(){
-        cards = new ArrayList<>();
+    public Rank getHandRank() {
+        return handRank;
     }
-    // TODO Write algorithm for comparison
 }

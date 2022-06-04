@@ -26,8 +26,10 @@ public class Deck implements IDeck{
     public boolean contains(Card card){
         return this.cards.contains(card);
     }
+
     @Override
     public Card getNextCard() {
         return cards.pollFirst();
     }
+
 }
