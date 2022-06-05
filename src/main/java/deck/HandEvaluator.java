@@ -1,15 +1,14 @@
 package deck;
 
 import deck.comparators.CardComparator;
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HandEvaluator {
-    // TODO : write tests.
     Map<Rank, Integer> rankFreq;
     Map<Suit, Integer> suitFreq;
     List<Card> cards;
-
+    Map<RankType, Rank> ranksMap;
     static HashMap<List<Rank>, Rank> allStraights = new HashMap<>(){
         {
             put(new ArrayList<Rank>(){{
@@ -97,46 +96,45 @@ public class HandEvaluator {
         this.cards = cards;
     }
 
-    public Rank handIsStraightFlush(){
-        Rank straightRank = handIsStraight();
-        Rank flushRank = handIsFlush();
-        boolean isBicyleStraightFlush = (flushRank == Rank.ACE && straightRank == Rank.FIVE);
-        if(isBicyleStraightFlush) return Rank.FIVE;
-        boolean isStraightFlush = flushRank != null && straightRank == flushRank;
-        return isStraightFlush ? straightRank : null;
-    }
-
-    public Rank handIsQuads(){
-        List<Rank> quadRanks = new ArrayList<>();
-        for(Map.Entry<Rank,Integer> entry : this.rankFreq.entrySet()){
-            if(entry.getValue() == 4) quadRanks.add(entry.getKey());
+    public boolean handIsStraightFlush(){
+        if(!handIsStraight() || !handIsFlush()) return false;
+        Suit flushColour = suitFreq.entrySet().stream().filter(entry -> entry.getValue() >= 5).map(Map.Entry::getKey).toList().get(0);
+        List<Rank> colouredRanks = new ArrayList<>(cards.stream().filter(card -> card.getSuit() == flushColour).map(Card::getRank).toList());
+        Collections.sort(colouredRanks);
+        if(allStraights.containsKey(colouredRanks)){
+            this.ranksMap.put(RankType.STRAIGHT_FLUSH_RANK, allStraights.get(colouredRanks));
+            return true;
         }
-        return quadRanks.isEmpty() ? null : Collections.max(quadRanks);
+        return false;
     }
 
-    public Rank handIsFullHouse(){
-        // TODO : Problem here is the exact same as two pairs, might need to compare on set or pair
-        Rank pairRank = handIsPair();
-        Rank setRank = handIsSet();
-        if(pairRank != null && setRank != null && pairRank != setRank) return setRank;
-        return null;
+    public boolean handIsQuads(){
+        List<Rank> quadRanks = this.rankFreq.entrySet().stream().filter(entry -> entry.getValue() == 4).map(Map.Entry::getKey).toList();
+        if(!quadRanks.isEmpty()) this.ranksMap.put(RankType.QUAD_RANK, Collections.max(quadRanks));
+        return !quadRanks.isEmpty();
     }
 
-    public Rank handIsFlush(){
+    public boolean handIsFullHouse(){
+        return handIsSet() && handIsPair();
+    }
+
+    public boolean handIsFlush(){
+        if(this.ranksMap.containsKey(RankType.FLUSH_RANK)) return true;
         for(Map.Entry<Suit, Integer> entry : this.suitFreq.entrySet()){
             if(entry.getValue() >= 5) {
-                List<Rank> suitedRanks = new ArrayList<>();
-                for(Card card : this.cards){
-                    if(card.getSuit() == entry.getKey()) suitedRanks.add(card.getRank());
-                }
-                return Collections.max(suitedRanks);
+                List<Rank> suitedRanks = this.cards.stream()
+                        .filter(card -> card.getSuit() == entry.getKey()).map(Card::getRank)
+                        .toList();
+                this.ranksMap.put(RankType.FLUSH_RANK,Collections.max(suitedRanks));
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
-    public Rank handIsStraight(){
-        if(cards.size() < 5) return null;
+    public boolean handIsStraight(){
+        if(this.ranksMap.containsKey(RankType.STRAIGHT_RANK)) return true;
+        if(cards.size() < 5) return false;
         List<Rank> ranks = new ArrayList<>(rankFreq.keySet());
         Rank straightRank = null;
         for(List<Rank> straight : HandEvaluator.allStraights.keySet()){
@@ -144,39 +142,66 @@ public class HandEvaluator {
             if(new HashSet<>(ranks).containsAll(straight))
                 straightRank = (straightRank == null || straightRank.compareTo(bestRank) < 0) ? bestRank : straightRank;
         }
-        return straightRank;
+        if(straightRank == null) return false;
+        this.ranksMap.put(RankType.STRAIGHT_RANK, straightRank);
+        return true;
     }
 
-    public Rank handIsSet(){
+    public boolean handIsSet(){
+        if(this.ranksMap.containsKey(RankType.SET_RANK)) return true;
         List<Rank> setRanks = new ArrayList<>();
         for(Map.Entry<Rank,Integer> entry : this.rankFreq.entrySet()){
             if(entry.getValue() == 3) setRanks.add(entry.getKey());
         }
-        return setRanks.isEmpty() ? null : Collections.max(setRanks);
+        if(setRanks.isEmpty()) return false;
+        List<Rank> excludedRanks = new ArrayList<>();
+        excludedRanks.add(Collections.max(setRanks));
+        this.ranksMap.put(RankType.SET_RANK, Collections.max(setRanks));
+        return handHighCard(excludedRanks);
     }
 
-    public Rank handIsTwoPairs(){
-        // TODO : Note that you may need to compare two players with two pairs, add an exception field.
+    public boolean handIsTwoPairs(){
         List<Rank> pairRanks = new ArrayList<>();
         for(Map.Entry<Rank,Integer> entry : this.rankFreq.entrySet()){
             if(entry.getValue() == 2) pairRanks.add(entry.getKey());
         }
-        if(pairRanks.size() < 2) return null;
+        if(pairRanks.size() < 2) return false;
         Collections.sort(pairRanks);
-        return Collections.max(pairRanks);
+        this.ranksMap.put(RankType.TOP_PAIR_RANK, pairRanks.get(0));
+        this.ranksMap.put(RankType.SEC_PAIR_RANK,pairRanks.get(1));
+        List<Rank> excludedRanks = new ArrayList<>(Arrays.asList(pairRanks.get(0), pairRanks.get(1)));
+        return handHighCard(excludedRanks);
     }
 
-    public Rank handIsPair(){
-        // Returns the highest pair rank if there's a pair, null otherwise
+    public boolean handIsPair(){
+        // Avoid overhead from Full house computation.
+        if(ranksMap.containsKey(RankType.TOP_PAIR_RANK)) return true;
+        Rank setRank = this.ranksMap.getOrDefault(RankType.SET_RANK, null);
         List<Rank> pairRanks = new ArrayList<>();
         for(Map.Entry<Rank,Integer> entry : this.rankFreq.entrySet()){
-            if(entry.getValue() == 2) pairRanks.add(entry.getKey());
+            if(entry.getValue() == 2 && (setRank == null || setRank != entry.getKey())) pairRanks.add(entry.getKey());
         }
-        return pairRanks.isEmpty() ? null : Collections.max(pairRanks);
+        if(pairRanks.isEmpty()) return false;
+        Rank maxRank = Collections.max(pairRanks);
+        this.ranksMap.put(RankType.TOP_PAIR_RANK, maxRank);
+        handHighCard(new ArrayList<>(Collections.singletonList(maxRank)));
+        return true;
     }
 
-    public Rank handHighCard(){
-        // Returns the highest rank in hand
-        return Collections.max(this.cards, new CardComparator()).getRank();
+    public boolean handHighCard(){
+        this.ranksMap.put(RankType.KICKER_RANK, Collections.max(this.cards, new CardComparator()).getRank());
+        return true;
+    }
+
+    public boolean handHighCard(List<Rank> excludedRanks){
+        Collections.sort(this.cards, new CardComparator());
+        for(int i = 0; i < this.cards.size();i++){
+            Rank curr = this.cards.get(i).getRank();
+            if(!excludedRanks.contains(curr)) {
+                this.ranksMap.put(RankType.KICKER_RANK, curr);
+                return true;
+            }
+        }
+        return false;
     }
 }

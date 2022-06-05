@@ -5,14 +5,22 @@ import deck.comparators.CardComparator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class Hand {
     private final HandType type;
-    private final Rank handRank;
+    private final Map<String,Rank> ranks;
 
     Hand(HandType type, Rank handRank){
         this.type = type;
         this.handRank = handRank;
+        this.kickerRank = null;
+    }
+
+    Hand(HandType type, Rank handRank, Rank kickerRank){
+        this.type = type;
+        this.handRank = handRank;
+        this.kickerRank = kickerRank;
     }
 
     public HandType getType() {
