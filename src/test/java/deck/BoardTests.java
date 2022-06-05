@@ -38,7 +38,7 @@ public class BoardTests {
     }
 
     // Have 10 of these.
-    public void testComputeBestHand(){
+    public void testComputeBestHand1(){
         Board board = new Board();
 
         Card deuceHearts = new Card(Rank.DEUCE, Suit.HEARTS);
@@ -56,7 +56,4 @@ public class BoardTests {
         expectedBestHand = new Hand(HandType.PAIR, Rank.DEUCE);
         Assertions.assertEquals(board.evaluateBestHand(), expectedBestHand);
     }
-
-
-
 }

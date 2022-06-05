@@ -3,8 +3,8 @@ package deck;
 import java.util.Objects;
 
 public class Card {
-    Rank rank;
-    Suit suit;
+    private Rank rank;
+    private Suit suit;
 
     public Card(Rank rank, Suit suit){
         this.rank = rank;
@@ -17,6 +17,14 @@ public class Card {
         if (!(o instanceof Card)) return false;
         Card card = (Card) o;
         return rank == card.rank && suit == card.suit;
+    }
+
+    public Rank getRank() {
+        return rank;
+    }
+
+    public Suit getSuit() {
+        return suit;
     }
 
     @Override
