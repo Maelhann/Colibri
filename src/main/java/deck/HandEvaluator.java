@@ -4,7 +4,7 @@ import deck.comparators.CardComparator;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class HandEvaluator {
+public class HandEvaluator implements IHandEvaluator{
     Map<Rank, Integer> rankFreq;
     Map<Suit, Integer> suitFreq;
     List<Card> cards;
@@ -93,9 +93,10 @@ public class HandEvaluator {
         }
         this.rankFreq = rankFreq;
         this.suitFreq = suitFreq;
+        this.ranksMap = new HashMap<>();
         this.cards = cards;
     }
-
+    @Override
     public boolean handIsStraightFlush(){
         if(!handIsStraight() || !handIsFlush()) return false;
         Suit flushColour = suitFreq.entrySet().stream().filter(entry -> entry.getValue() >= 5).map(Map.Entry::getKey).toList().get(0);
@@ -107,17 +108,17 @@ public class HandEvaluator {
         }
         return false;
     }
-
+    @Override
     public boolean handIsQuads(){
         List<Rank> quadRanks = this.rankFreq.entrySet().stream().filter(entry -> entry.getValue() == 4).map(Map.Entry::getKey).toList();
         if(!quadRanks.isEmpty()) this.ranksMap.put(RankType.QUAD_RANK, Collections.max(quadRanks));
         return !quadRanks.isEmpty();
     }
-
+    @Override
     public boolean handIsFullHouse(){
         return handIsSet() && handIsPair();
     }
-
+    @Override
     public boolean handIsFlush(){
         if(this.ranksMap.containsKey(RankType.FLUSH_RANK)) return true;
         for(Map.Entry<Suit, Integer> entry : this.suitFreq.entrySet()){
@@ -131,7 +132,7 @@ public class HandEvaluator {
         }
         return false;
     }
-
+    @Override
     public boolean handIsStraight(){
         if(this.ranksMap.containsKey(RankType.STRAIGHT_RANK)) return true;
         if(cards.size() < 5) return false;
@@ -146,7 +147,7 @@ public class HandEvaluator {
         this.ranksMap.put(RankType.STRAIGHT_RANK, straightRank);
         return true;
     }
-
+    @Override
     public boolean handIsSet(){
         if(this.ranksMap.containsKey(RankType.SET_RANK)) return true;
         List<Rank> setRanks = new ArrayList<>();
@@ -159,7 +160,7 @@ public class HandEvaluator {
         this.ranksMap.put(RankType.SET_RANK, Collections.max(setRanks));
         return handHighCard(excludedRanks);
     }
-
+    @Override
     public boolean handIsTwoPairs(){
         List<Rank> pairRanks = new ArrayList<>();
         for(Map.Entry<Rank,Integer> entry : this.rankFreq.entrySet()){
@@ -172,7 +173,7 @@ public class HandEvaluator {
         List<Rank> excludedRanks = new ArrayList<>(Arrays.asList(pairRanks.get(0), pairRanks.get(1)));
         return handHighCard(excludedRanks);
     }
-
+    @Override
     public boolean handIsPair(){
         // Avoid overhead from Full house computation.
         if(ranksMap.containsKey(RankType.TOP_PAIR_RANK)) return true;
@@ -187,7 +188,7 @@ public class HandEvaluator {
         handHighCard(new ArrayList<>(Collections.singletonList(maxRank)));
         return true;
     }
-
+    @Override
     public boolean handHighCard(){
         this.ranksMap.put(RankType.KICKER_RANK, Collections.max(this.cards, new CardComparator()).getRank());
         return true;
@@ -203,5 +204,18 @@ public class HandEvaluator {
             }
         }
         return false;
+    }
+
+    @Override
+    public Hand evaluateBestHand(){
+        if(handIsStraightFlush()) return new Hand(HandType.STRAIGHT_FLUSH,this.ranksMap);
+        if(handIsQuads()) return new Hand(HandType.FOUR_OF_A_KIND,this.ranksMap);
+        if(handIsFullHouse()) return new Hand(HandType.FULL_HOUSE,this.ranksMap);
+        if(handIsFlush()) return new Hand(HandType.FLUSH,this.ranksMap);
+        if(handIsStraight()) return new Hand(HandType.STRAIGHT,this.ranksMap);
+        if(handIsSet()) return new Hand(HandType.THREE_OF_A_KIND,this.ranksMap);
+        if(handIsTwoPairs()) return new Hand(HandType.TWO_PAIRS,this.ranksMap);
+        if(handIsPair()) return new Hand(HandType.PAIR,this.ranksMap);
+        return new Hand(HandType.HIGH_CARD, this.ranksMap);
     }
 }
