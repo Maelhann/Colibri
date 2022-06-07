@@ -1,9 +1,11 @@
 package deck;
 
+import deck.comparators.CardComparator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BoardTests {
@@ -18,11 +20,12 @@ public class BoardTests {
             expectedCards.add(nextCard);
             Assertions.assertTrue(board.addCard(nextCard));
         }
-        Assertions.assertEquals(expectedCards, board.cards);
-        Assertions.assertEquals(7, board.cards.size());
-        List<Card> cards = board.cards;
+        expectedCards.sort(new CardComparator());
+        Assertions.assertEquals(expectedCards, board.evaluator.cards);
+        Assertions.assertEquals(7, board.evaluator.cards.size());
+        List<Card> cards = board.evaluator.cards;
         Assertions.assertFalse(board.addCard(deck.getNextCard()));
-        Assertions.assertEquals(cards, board.cards);
+        Assertions.assertEquals(cards, board.evaluator.cards);
     }
 
     @Test
@@ -34,7 +37,7 @@ public class BoardTests {
             board.addCard(deck.getNextCard());
         }
         board.clearHand();
-        Assertions.assertEquals(expectedCards, board.cards);
+        Assertions.assertEquals(expectedCards, board.evaluator.cards);
     }
 
 }

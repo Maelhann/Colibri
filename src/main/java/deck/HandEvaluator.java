@@ -114,6 +114,14 @@ public class HandEvaluator implements IHandEvaluator{
     }
 
     @Override
+    public void clearHand() {
+        this.rankFreq = new HashMap<>();;
+        this.suitFreq = new HashMap<>();
+        this.ranksMap = new HashMap<>();
+        this.cards = new ArrayList<>();
+    }
+
+    @Override
     public boolean handIsStraightFlush(){
         if(!handIsStraight() || !handIsFlush()) return false;
         Suit flushColour = suitFreq.entrySet().stream().filter(entry -> entry.getValue() >= 5).map(Map.Entry::getKey).toList().get(0);

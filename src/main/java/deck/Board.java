@@ -4,28 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Board implements IBoard {
-    List<Card> cards;
     Hand bestHand;
+    HandEvaluator evaluator;
     Board(){
-       this.cards = new ArrayList<>();
+       this.evaluator = new HandEvaluator();
     }
 
     @Override
     public boolean addCard(Card card){
-        if (cards.size() >= 7) return false;
-        cards.add(card);
-        this.bestHand = computeBestHand();
+        if (this.evaluator.cards.size() >= 7) return false;
+        this.evaluator.updateHand(card);
+        this.bestHand = evaluator.evaluateBestHand();
         return true;
     }
-
-    @Override
     public void clearHand(){
-        cards = new ArrayList<>();
-    }
-
-    @Override
-    public Hand computeBestHand() {
-        HandEvaluator evaluator = new HandEvaluator(this.cards);
-        return evaluator.evaluateBestHand();
+        this.evaluator.clearHand();
     }
 }

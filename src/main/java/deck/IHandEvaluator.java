@@ -12,4 +12,5 @@ public interface IHandEvaluator {
     boolean handHighCard();
     Hand evaluateBestHand();
     void updateHand(Card card);
+    void clearHand();
 }
