@@ -37,23 +37,4 @@ public class BoardTests {
         Assertions.assertEquals(expectedCards, board.cards);
     }
 
-    // Have 10 of these.
-    public void testComputeBestHand1(){
-        Board board = new Board();
-        // TODO write those tests.
-//        Card deuceHearts = new Card(Rank.DEUCE, Suit.HEARTS);
-//        board.addCard(deuceHearts);
-//        Hand expectedBestHand = new Hand(HandType.HIGH_CARD, Rank.DEUCE);
-//        Assertions.assertEquals(board.evaluateBestHand(), expectedBestHand);
-//
-//        Card fiveClubs = new Card(Rank.FIVE, Suit.CLUBS);
-//        board.addCard(fiveClubs);
-//        expectedBestHand = new Hand(HandType.HIGH_CARD, Rank.FIVE);
-//        Assertions.assertEquals(board.evaluateBestHand(), expectedBestHand);
-//
-//        Card deuceSpades = new Card(Rank.DEUCE, Suit.SPADES);
-//        board.addCard(deuceSpades);
-//        expectedBestHand = new Hand(HandType.PAIR, Rank.DEUCE);
-//        Assertions.assertEquals(board.evaluateBestHand(), expectedBestHand);
-    }
 }

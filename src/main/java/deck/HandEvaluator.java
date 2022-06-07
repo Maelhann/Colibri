@@ -96,6 +96,23 @@ public class HandEvaluator implements IHandEvaluator{
         this.ranksMap = new HashMap<>();
         this.cards = cards;
     }
+
+    HandEvaluator(){
+        Map<Rank, Integer> rankFreq = new HashMap<>();
+        Map<Suit, Integer> suitFreq = new HashMap<>();
+        this.rankFreq = rankFreq;
+        this.suitFreq = suitFreq;
+        this.ranksMap = new HashMap<>();
+        this.cards = new ArrayList<>();
+    }
+
+    @Override
+    public void updateHand(Card card){
+        rankFreq.put(card.getRank(), rankFreq.getOrDefault(card.getRank(),0)+1);
+        suitFreq.put(card.getSuit(), suitFreq.getOrDefault(card.getSuit(), 0)+1);
+        this.cards.add(card);
+    }
+
     @Override
     public boolean handIsStraightFlush(){
         if(!handIsStraight() || !handIsFlush()) return false;
